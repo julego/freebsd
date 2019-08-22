@@ -16,6 +16,14 @@ from older versions of FreeBSD, try WITHOUT_CLANG and WITH_GCC to bootstrap to
 the tip of head, and then rebuild without this option. The bootstrap process
 from older version of current across the gcc/clang cutover is a bit fragile.
 
+20190830  icpx/12.0-p10
+  Added custom ether option DROP_PROXY_REQUESTS_IF_CARP_BACKUP
+
+  Changed files:  sys/amd64/conf/ICPX
+                  sys/amd64/conf/NOTES
+                  sys/conf/options
+                  sys/netinet/if_ether.c
+
 20190820	p10	FreeBSD-EN-19:16.bhyve
 			FreeBSD-SA-19:22.mbuf
 			FreeBSD-SA-19:23.midi
