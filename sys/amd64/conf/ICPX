@@ -1,0 +1,35 @@
+include		GENERIC
+
+ident		ICPX
+
+nooptions	MAC
+nooptions	COMPAT_FREEBSD4
+nooptions	COMPAT_FREEBSD5
+nooptions	COMPAT_FREEBSD6
+nooptions	COMPAT_FREEBSD7
+nooptions	COMPAT_FREEBSD9
+nooptions	COMPAT_FREEBSD10
+
+# Networking
+device		carp
+device		pf
+device		pflog
+device		pfsync
+device		em
+device		vmx
+
+# Pseudo devices.
+device		crypto
+device		cryptodev
+device		aesni
+
+# VirtIO support
+device		virtio
+device		virtio_pci
+device		vtnet
+device		virtio_blk
+device		virtio_scsi
+device		virtio_balloon
+
+# Custom Ether options
+options		DROP_PROXY_REQUESTS_IF_CARP_BACKUP

@@ -1024,3 +1024,6 @@ NVME_USE_NVD	opt_nvme.h
 
 # amdsbwd options
 AMDSBWD_DEBUG	opt_amdsbwd.h
+
+# Custom Ether options
+DROP_PROXY_REQUESTS_IF_CARP_BACKUP	opt_inet.h

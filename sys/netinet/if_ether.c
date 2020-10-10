@@ -188,6 +188,20 @@ static const struct netisr_handler arp_nh = {
 };
 
 /*
+ * Configure CARP slaves to drop proxy ARP requests if the requested address
+ * is published with the CARP virtual mac
+ */
+#if defined(INET) && defined(DROP_PROXY_REQUESTS_IF_CARP_BACKUP)
+VNET_DEFINE_STATIC(int, drop_proxy_requests_if_carp_backup) = 0;
+
+#define V_drop_proxy_requests_if_carp_backup VNET(drop_proxy_requests_if_carp_backup)
+
+SYSCTL_INT(_net_link_ether_inet, OID_AUTO, drop_proxy_requests_if_carp_backup,
+	CTLFLAG_VNET | CTLFLAG_RW, &VNET_NAME(drop_proxy_requests_if_carp_backup), 0,
+	"Drop proxy ARP requests if CARP status is BACKUP");
+#endif
+
+/*
  * Timeout routine.  Age arp_tab entries periodically.
  */
 static void
@@ -1037,6 +1051,26 @@ reply:
 		IF_AFDATA_RUNLOCK(ifp);
 
 		if ((lle != NULL) && (lle->la_flags & LLE_PUB)) {
+			#ifdef V_drop_proxy_requests_if_carp_backup
+			if (V_drop_proxy_requests_if_carp_backup &&
+				lle->ll_addr[0] == 0 &&
+				lle->ll_addr[1] == 0 &&
+				lle->ll_addr[2] == 0x5e &&
+				lle->ll_addr[3] == 0 &&
+				lle->ll_addr[4] == 1) {
+				IF_ADDR_RLOCK(ifp);
+				CK_STAILQ_FOREACH(ifa, &ifp->if_addrhead, ifa_link)
+				if (ifa->ifa_addr->sa_family == AF_INET &&
+					ifa->ifa_carp != NULL && !(*carp_master_p)(ifa) &&
+					(u_char)lle->ll_addr[5] == (u_char)(*carp_get_vhid_p)(ifa)) {
+					IF_ADDR_RUNLOCK(ifp);
+					LLE_RUNLOCK(lle);
+					goto drop;
+				}
+				IF_ADDR_RUNLOCK(ifp);
+			}
+			#endif
+
 			(void)memcpy(ar_tha(ah), ar_sha(ah), ah->ar_hln);
 			(void)memcpy(ar_sha(ah), lle->ll_addr, ah->ar_hln);
 			LLE_RUNLOCK(lle);
